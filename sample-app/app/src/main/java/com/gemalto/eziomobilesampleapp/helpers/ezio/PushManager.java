@@ -135,11 +135,11 @@ public class PushManager {
 
     public void initWithPermissions() throws MalformedURLException {
         mOobManager = OobModule.create().createOobManager(
-                new URL(Configuration.CFG_OOB_URL),
-                Configuration.CFG_OOB_DOMAIN,
-                Configuration.CFG_OOB_APP_ID,
-                Configuration.CFG_OOB_RSA_KEY_EXPONENT,
-                Configuration.CFG_OOB_RSA_KEY_MODULUS);
+                new URL(Configuration.getOobUrl()),
+                Configuration.getOobDomain(),
+                Configuration.getOobAppId(),
+                Configuration.getOobRsaKeyExponent(),
+                Configuration.getOobRsaKeyModulus());
 
         // Call register just in case we did get token already.
         registerCurrent(null);
@@ -247,7 +247,7 @@ public class PushManager {
 
 
             // Prepare manager with current client and provider id.
-            final OobMessageManager oobMessageManager = mOobManager.getOobMessageManager(locClientId, Configuration.CFG_OOB_PROVIDER_ID);
+            final OobMessageManager oobMessageManager = mOobManager.getOobMessageManager(locClientId, Configuration.getOobProviderId());
 
             // Download message content.
             // Some messages might already be pre-fetched so we don't have to download them.
@@ -463,7 +463,7 @@ public class PushManager {
 
     private void registerOOBClientId(@NonNull final String clientId, @NonNull final String token, @NonNull final Protocols.GenericHandler completionHandler) {
         final OobNotificationManager notifyManager = mOobManager.getOobNotificationManager(clientId);
-        final List<OobNotificationProfile> arrProfiles = Collections.singletonList(new OobNotificationProfile(Configuration.CFG_OOB_CHANNEL, token));
+        final List<OobNotificationProfile> arrProfiles = Collections.singletonList(new OobNotificationProfile(Configuration.getOobChannel(), token));
 
         notifyManager.setNotificationProfiles(arrProfiles, new OobSetNotificationProfileCallback() {
             @Override

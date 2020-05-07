@@ -33,7 +33,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -50,6 +49,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -162,6 +162,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Make application fullscreen
         final int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
         getWindow().setFlags(uiOptions, uiOptions);
+
+        // Load configuration if none available
+        try {
+            Configuration.init();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e("MAIN", "Failed to initialize configuration");
+        }
     }
 
     @Override
@@ -408,7 +416,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void onTextPressedPrivacyPolicy(final View sender) {
         final Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                Configuration.CFG_PRIVACY_POLICY_URL);
+                Configuration.getPrivacyPolicyUrl());
         startActivity(browserIntent);
     }
 

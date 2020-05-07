@@ -79,7 +79,7 @@ public class FragmentSign extends AbstractMainFragmentWithAuthSolver {
 
         final TextView domainTextView = retValue.findViewById(R.id.tv_fragment_description);
         if (domainTextView != null) {
-            domainTextView.setText(String.format("Domain: %s", Configuration.CFG_OOB_DOMAIN));
+            domainTextView.setText(String.format("Domain: %s", Configuration.getOobDomain()));
         }
 
         if (Main.sharedInstance().getManagerToken() != null

@@ -100,7 +100,7 @@ public class HttpManager {
             otp.wipe();
 
             // Post message and wait for results.
-            doPostMessage(Configuration.CFG_TUTO_URL_AUTH, "text/xml", authHeaders(), body, delegate);
+            doPostMessage(Configuration.getTutoUrlAuth(), "text/xml", authHeaders(), body, delegate);
         } else if (currentListener != null) {
             currentListener.showErrorIfExists(error);
         }
@@ -132,7 +132,7 @@ public class HttpManager {
             otp.wipe();
 
             // Post message and wait for results.
-            doPostMessage(Configuration.CFG_TUTO_URL_AUTH, "text/xml", authHeaders(), body, delegate);
+            doPostMessage(Configuration.getTutoUrlAuth(), "text/xml", authHeaders(), body, delegate);
         } else if (currentListener != null) {
             currentListener.showErrorIfExists(error);
         }
@@ -161,7 +161,7 @@ public class HttpManager {
             otp.wipe();
 
             // Post message and wait for results.
-            doPostMessage(Configuration.CFG_TUTO_URL_SIGN, "text/xml", authHeaders(), body, delegate);
+            doPostMessage(Configuration.getTutoUrlSign(), "text/xml", authHeaders(), body, delegate);
         } else if (currentListener != null) {
             currentListener.showErrorIfExists(error);
         }
@@ -181,7 +181,7 @@ public class HttpManager {
     }
 
     private Map<String, String> authHeaders() {
-        final String hash = "Basic " + new String(Base64.encode((Configuration.CFG_TUTO_BASICAUTH_USERNAME + ":" + Configuration.CFG_TUTO_BASICAUTH_PASSWORD).getBytes(), 0));
+        final String hash = "Basic " + new String(Base64.encode((Configuration.getTutoBasicAuthUsername() + ":" + Configuration.getTutoBasicAuthPassword()).getBytes(), 0));
         final HashMap<String, String> retValue = new HashMap<>();
         retValue.put("Authorization", hash);
         return retValue;

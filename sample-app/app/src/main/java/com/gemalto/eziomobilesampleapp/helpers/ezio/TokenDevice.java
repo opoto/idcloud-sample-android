@@ -76,7 +76,7 @@ public class TokenDevice {
 
         // Create device based on specific ocra suite.
         final SoftOathSettings oathSettings = factory.createSoftOathSettings();
-        oathSettings.setOcraSuite(Main.sharedInstance().secureStringFromString(Configuration.CFG_OTP_OCRA_SUITE));
+        oathSettings.setOcraSuite(Main.sharedInstance().secureStringFromString(Configuration.getOtpOcraSuite()));
         mDevice = factory.createSoftOathDevice((SoftOathToken) token, oathSettings);
         mToken = token;
     }

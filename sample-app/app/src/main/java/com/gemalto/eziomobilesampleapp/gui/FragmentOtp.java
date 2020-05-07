@@ -115,7 +115,7 @@ public class FragmentOtp extends AbstractMainFragmentWithAuthSolver implements P
 
         final TextView domainTextView = retValue.findViewById(R.id.tv_fragment_description);
         if (domainTextView != null) {
-            domainTextView.setText(String.format("Domain: %s", Configuration.CFG_OOB_DOMAIN));
+            domainTextView.setText(String.format("Domain: %s", Configuration.getOobDomain()));
         }
 
         mOtp = retValue.findViewById(R.id.text_view_otp);
@@ -254,7 +254,7 @@ public class FragmentOtp extends AbstractMainFragmentWithAuthSolver implements P
                     mCircleTimerAnimation.cancel();
                 }
 
-                mCircleTimerAnimation = new CircleTimerAnimation(mCircleTimer, mLifespan, Configuration.CFG_OTP_LIFESPAN, lifeSpan);
+                mCircleTimerAnimation = new CircleTimerAnimation(mCircleTimer, mLifespan, Configuration.getOtLifespan(), lifeSpan);
                 mCircleTimer.startAnimation(mCircleTimerAnimation);
             }
         });

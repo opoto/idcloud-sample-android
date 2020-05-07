@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -31,6 +34,11 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+    defaultConfig {
+        buildConfigField "String", "CONFIG_PASSWORD", properties.getProperty("configuration.password", "")
+        buildConfigField "String", "CONFIG_URL", properties.getProperty("configuration.url", "")
+        buildConfigField "Boolean", "CONFIG_RELOAD", properties.getProperty("configuration.reload", "false")
     }
 }
 
@@ -65,6 +73,9 @@ dependencies {
 
     // UI Style
     implementation project(':idcloudstyle')
+
+    // Configuration Manager
+    implementation project(path: ':configuration-manager')
 }
 
 apply plugin: 'com.google.gms.google-services'

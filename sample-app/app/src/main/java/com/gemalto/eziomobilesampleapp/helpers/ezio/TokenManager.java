@@ -169,7 +169,7 @@ public class TokenManager {
                                           final ProvisionerHandler completionHandler) {
         URL provisionUrl = null;
         try {
-            provisionUrl = new URL(Configuration.CFG_OTP_PROVISION_URL);
+            provisionUrl = new URL(Configuration.getOtpProvisionUrl());
         } catch (MalformedURLException e) {
             // Invalid configuration
             Main.sharedInstance().getCurrentListener().finish();
@@ -178,12 +178,12 @@ public class TokenManager {
         // Prepare provisioning configuration based on app data.
         final ProvisioningConfiguration config = new EpsConfigurationBuilder(regCode,
                 provisionUrl,
-                Configuration.DOMAIN,
+                Configuration.getOtpDomain(),
                 MobileProvisioningProtocol.PROVISIONING_PROTOCOL_V5,
-                Configuration.CFG_OTP_RSA_KEY_ID,
-                Configuration.CFG_OTP_RSA_KEY_EXPONENT,
-                Configuration.CFG_OTP_RSA_KEY_MODULUS)
-                .setTlsConfiguration(Configuration.CFG_SDK_TLS_CONFIGURATION).build();
+                Configuration.getOtpRsaKeyId(),
+                Configuration.getRsaKeyExponent(),
+                Configuration.getOtpRsaKeyModulus())
+                .setTlsConfiguration(Configuration.getSdkTlsConfiguration()).build();
 
         final DeviceFingerprintSource
                 deviceFingerprintSource = new DeviceFingerprintSource(Configuration.getCustomFingerprintData(),

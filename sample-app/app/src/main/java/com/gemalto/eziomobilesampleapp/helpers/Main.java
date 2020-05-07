@@ -64,6 +64,7 @@ import com.gemalto.idp.mobile.core.passwordmanager.PasswordManagerException;
 import com.gemalto.idp.mobile.core.util.SecureByteArray;
 import com.gemalto.idp.mobile.core.util.SecureString;
 import com.gemalto.idp.mobile.msp.MspConfiguration;
+import com.gemalto.idp.mobile.msp.MspSignatureKey;
 import com.gemalto.idp.mobile.oob.OobConfiguration;
 import com.gemalto.idp.mobile.otp.OtpConfiguration;
 
@@ -189,7 +190,7 @@ public class Main {
             @Override
             public void run() {
                 synchronized (sInstance) {
-                    mCore = IdpCore.configure(Configuration.CFG_SDK_ACTIVATION_CODE,
+                    mCore = IdpCore.configure(Configuration.getSdkActivationCode(),
                                               getConfigurationOob(),
                                               getConfigurationOtp(),
                                               getConfigurationMsp());
@@ -421,15 +422,17 @@ public class Main {
         }
 
         // Support sample app even without face id.
-        if (Configuration.CFG_FACE_ID_PRODUCT_KEY == null || Configuration.CFG_FACE_ID_PRODUCT_KEY.isEmpty() ||
-                Configuration.CFG_FACE_ID_SERVER_URL == null || Configuration.CFG_FACE_ID_SERVER_URL.isEmpty()) {
+        String faceIdProdKey = Configuration.getFaceIdProductKey();
+        String faceIdSrvUrl = Configuration.getFaceIdServerUrl();
+        if (faceIdProdKey == null || faceIdProdKey.isEmpty() ||
+                faceIdSrvUrl == null || faceIdSrvUrl.isEmpty()) {
             setGemaloFaceIdState(GemaloFaceIdState.GemaloFaceIdStateUnlicensed);
             return;
         }
 
         final FaceAuthLicense license = new FaceAuthLicense.Builder()
-                .setProductKey(Configuration.CFG_FACE_ID_PRODUCT_KEY)
-                .setServerUrl(Configuration.CFG_FACE_ID_SERVER_URL)
+                .setProductKey(faceIdProdKey)
+                .setServerUrl(faceIdSrvUrl)
                 .build();
 
         faceIdService.configureLicense(license, new FaceAuthLicenseConfigurationCallback() {
@@ -498,7 +501,7 @@ public class Main {
      */
     private OtpConfiguration getConfigurationOtp() {
         // OTP module is required for token management and OTP calculation.
-        return new OtpConfiguration.Builder().setRootPolicy(Configuration.CFG_OTP_ROOT_POLICY).build();
+        return new OtpConfiguration.Builder().setRootPolicy(Configuration.getOtpRootPolicy()).build();
     }
 
     /**
@@ -510,12 +513,12 @@ public class Main {
         // OOB module is required for push notifications.
         return new OobConfiguration.Builder()
                 // Device fingerprint is used for security reason. This way app can add some additional input for internal encryption mechanism.
-                // This value must remain the same all the time. Othewise all provisioned tokens will not be valid any more.
-                .setDeviceFingerprintSource(Configuration.CFG_SDK_DEVICE_FINGERPRINT_SOURCE)
+                // This value must remain the same all the time. Otherwise all provisioned tokens will not be valid any more.
+                .setDeviceFingerprintSource(Configuration.getSdkDeviceFingerprintSource())
                 // Jailbreak policy for OOB module. See EMOobJailbreakPolicyIgnore for more details.
-                .setRootPolicy(Configuration.CFG_OOB_ROOT_POLICY)
+                .setRootPolicy(Configuration.getOobRootPolicy())
                 // For debug and ONLY debug reasons we might lower some TLS configuration.
-                .setTlsConfiguration(Configuration.CFG_SDK_TLS_CONFIGURATION).build();
+                .setTlsConfiguration(Configuration.getSdkTlsConfiguration()).build();
     }
 
     /**
@@ -528,12 +531,14 @@ public class Main {
         final MspConfiguration.Builder builder = new MspConfiguration.Builder();
 
         // Set obfuscation
-        if (Configuration.CFG_MSP_OBFUSCATION_CODE != null) {
-            builder.setObfuscationKeys(Configuration.CFG_MSP_OBFUSCATION_CODE);
+        List<byte[]> mspObfKeys = Configuration.getMspObfuscationCode();
+        if (mspObfKeys != null) {
+            builder.setObfuscationKeys(mspObfKeys);
         }
         // Set signature
-        if (Configuration.CFG_MSP_SIGN_KEYS != null) {
-            builder.setSignatureKeys(Configuration.CFG_MSP_SIGN_KEYS);
+        List<MspSignatureKey> mspSignKeys = Configuration.getMspSignKeys();
+        if (mspSignKeys != null) {
+            builder.setSignatureKeys(mspSignKeys);
         }
 
         return builder.build();
