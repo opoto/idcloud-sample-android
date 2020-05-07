@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -157,5 +158,13 @@ public class ConfigurationMangerTest {
         cm.clear();
         assertFalse(cm.isLoaded());
         cm.getConfigurationSetting("test1", null);
+    }
+
+    @Test
+    public void loadUrl() throws IOException, ConfigurationManager.ConfigurationDecryptionError, ConfigurationManager.ConfigurationNotLoaded {
+        ConfigurationManager cm = new ConfigurationManager(ctx);
+        cm.loadConfigurationFromUrl("https://raw.githubusercontent.com/opoto/idcloud-sample-android/master/sample-app/gradle.properties", DUMMY_PWD);
+        assertTrue(cm.isLoaded());
+        assertNotEquals(null, cm.getConfigurationSetting("org.gradle.jvmargs", null));
     }
 }
