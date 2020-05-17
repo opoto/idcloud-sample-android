@@ -28,14 +28,14 @@ public class ConfigurationManager {
 
     //region Defines
 
-    private static final String PREF_NAME = "_CM$_";
     private static final String ENC_PREFIX = "ENC(";
     private static final String ENC_SUFFIX = ")";
-    private static final String LOG_TAG = "ConfigurationManager";
-    private static final String PREF_PREFIX = "_CM$_";
-    private static final String PREF_LOADED = PREF_PREFIX + "_CM$_.loaded";
+    static final String PREF_PREFIX = "_CM$_";
+    private static final String PREF_LOADED = PREF_PREFIX + ".loaded";
 
-    final Context context;
+    static final String PREF_NAME = PREF_PREFIX + ".preferences";
+    static final String LOG_TAG = "ConfigurationManager";
+    private final Context context;
     final SharedPreferences preferences;
     private final Map<String, SecretKey> keys = new HashMap<>();
 
@@ -67,11 +67,11 @@ public class ConfigurationManager {
     }
 
     /**
-     * @throws ConfigurationNotLoaded if configuration is not loaded
+     * @throws ConfigurationManagerError if configuration is not loaded
      */
-    void checkLoaded() throws ConfigurationNotLoaded {
+    private void checkLoaded() throws ConfigurationManagerError {
         if (!isLoaded()) {
-            throw new ConfigurationNotLoaded();
+            throw new ConfigurationManagerError("Configuration is NOT loaded");
         }
     }
 
@@ -85,7 +85,7 @@ public class ConfigurationManager {
                 editor.remove(key);
             }
         }
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -107,7 +107,7 @@ public class ConfigurationManager {
         return secretKeyFactory.generateSecret(keySpec);
     }
 
-    private String decryptValue(String value, char[] password) throws ConfigurationDecryptionError {
+    private String decryptValue(String value, char[] password) throws ConfigurationManagerError {
         // Encrypted format:
         //  iterations#algorithm#keySize#base64(salt)#base64(iv)#base64(ciphered)
         String res = value;
@@ -165,18 +165,18 @@ public class ConfigurationManager {
                     keys.put(params, decKey);
                 } catch (Exception err) {
                     Log.e(LOG_TAG, "Key derivation error", err);
-                    throw new ConfigurationDecryptionError("Failed to derive key");
+                    throw new ConfigurationManagerError("Failed to derive key");
                 }
                 time = new Date().getTime() - time;
                 Log.d(LOG_TAG, "Derived key in " + time + "ms");
             }
 
-        } catch (ConfigurationDecryptionError err) {
+        } catch (ConfigurationManagerError err) {
             // propagate
             throw err;
         } catch (Exception err) {
             Log.e(LOG_TAG, "Decoding error", err);
-            throw new ConfigurationDecryptionError("Failed to parse encrypted value");
+            throw new ConfigurationManagerError("Failed to parse encrypted value");
         }
 
         try {
@@ -188,7 +188,7 @@ public class ConfigurationManager {
             Log.d(LOG_TAG, "Decrypted in " + time + "ms");
         } catch (Exception err) {
             Log.e(LOG_TAG, "Decryption error", err);
-            throw new ConfigurationDecryptionError("Failed to decrypt value");
+            throw new ConfigurationManagerError("Failed to decrypt value");
         }
         return res;
     }
@@ -198,35 +198,37 @@ public class ConfigurationManager {
     }
 
     public String getConfigurationSetting(String key, String defaultValue)
-            throws ConfigurationNotLoaded  {
+            throws ConfigurationManagerError  {
         checkLoaded();
         return readSetting(key, defaultValue);
     }
 
-    void storeSetting(SharedPreferences.Editor editor, String key, String value) {
+    void storeSetting(SharedPreferences.Editor editor, boolean secure, String key, String value) {
         editor.putString(PREF_PREFIX + key, value);
     }
 
     public void loadConfigurationFromInputStream(InputStream in, char[] password)
-            throws IOException, ConfigurationDecryptionError {
+            throws IOException, ConfigurationManagerError {
         Properties properties = new Properties();
         properties.load(in);
         SharedPreferences.Editor editor = preferences.edit();
         editor.clear();
         for (String key: properties.stringPropertyNames()) {
             String value = properties.getProperty(key);
+            boolean secure = false;
             if ((value != null) && (value.startsWith(ENC_PREFIX)) && (value.endsWith(ENC_SUFFIX))) {
                 if ((password == null) || (password.length == 0)) {
-                    throw new ConfigurationDecryptionError(key + ": cannot decrypt due to missing password");
+                    throw new ConfigurationManagerError(key + ": cannot decrypt due to missing password");
                 }
                 try {
+                    secure = true;
                     value = decryptValue(value.substring(ENC_PREFIX.length(), value.length() - ENC_SUFFIX.length()),
                             password);
-                } catch (ConfigurationDecryptionError ex) {
-                    throw new ConfigurationDecryptionError(key + ": " + ex.getMessage());
+                } catch (ConfigurationManagerError ex) {
+                    throw new ConfigurationManagerError(key + ": " + ex.getMessage());
                 }
             }
-            storeSetting(editor, key, value);
+            storeSetting(editor, secure, key, value);
         }
         keys.clear();
         editor.putBoolean(PREF_LOADED, true);
@@ -244,7 +246,7 @@ public class ConfigurationManager {
      * @throws IOException if error while reading URL content
      */
     public void loadConfigurationFromUrl(String url, char[] password, int connectTimeout, int readTimeout)
-            throws IOException, ConfigurationDecryptionError {
+            throws IOException, ConfigurationManagerError {
 
         InputStream input = null;
         Log.i(LOG_TAG, "Loading configuration from " + url);
@@ -282,14 +284,12 @@ public class ConfigurationManager {
      * @throws IOException if error while reading URL content
      */
     public void loadConfigurationFromUrl(String url, char[] password)
-            throws IOException, ConfigurationDecryptionError {
+            throws IOException, ConfigurationManagerError {
         loadConfigurationFromUrl(url, password, 15000, 15000);
     }
 
-    public static class ConfigurationNotLoaded extends Exception {}
-
-    public static class ConfigurationDecryptionError extends Exception {
-        ConfigurationDecryptionError(String message) {
+    public static class ConfigurationManagerError extends Exception {
+        ConfigurationManagerError(String message) {
             super(message);
         }
     }

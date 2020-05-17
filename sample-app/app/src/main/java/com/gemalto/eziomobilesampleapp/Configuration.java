@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.gemalto.ezio.configurationmanager.ConfigurationManager;
+import com.gemalto.ezio.configurationmanager.EncryptedConfigurationManager;
 import com.gemalto.idp.mobile.core.ApplicationContextHolder;
 import com.gemalto.idp.mobile.core.devicefingerprint.DeviceFingerprintSource;
 import com.gemalto.idp.mobile.core.net.TlsConfiguration;
@@ -41,16 +42,20 @@ import com.google.android.gms.common.util.Hex;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Configuration {
 
-    private static ConfigurationManager config = new ConfigurationManager(ApplicationContextHolder.getContext());
+    private static ConfigurationManager config;
     private final static String LOG_TAG = "CONFIG";
 
-    public final static void init() throws IOException, ConfigurationManager.ConfigurationDecryptionError {
+    public final static void init() throws IOException, ConfigurationManager.ConfigurationManagerError, GeneralSecurityException {
+        config = BuildConfig.CONFIG_ENCRYPT ?
+                new EncryptedConfigurationManager(ApplicationContextHolder.getContext()) :
+                new ConfigurationManager(ApplicationContextHolder.getContext());
         if (BuildConfig.CONFIG_RELOAD || !config.isLoaded()) {
             config.loadConfigurationFromUrl(BuildConfig.CONFIG_URL, BuildConfig.CONFIG_PASSWORD.toCharArray());
         }

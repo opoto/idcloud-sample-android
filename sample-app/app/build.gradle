@@ -39,6 +39,7 @@ android {
         buildConfigField "String", "CONFIG_PASSWORD", properties.getProperty("configuration.password", "")
         buildConfigField "String", "CONFIG_URL", properties.getProperty("configuration.url", "")
         buildConfigField "Boolean", "CONFIG_RELOAD", properties.getProperty("configuration.reload", "false")
+        buildConfigField "Boolean", "CONFIG_ENCRYPT", properties.getProperty("configuration.encrypt", "false")
     }
 }
 
