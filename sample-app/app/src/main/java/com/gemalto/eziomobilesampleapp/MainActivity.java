@@ -476,7 +476,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean checkMandatoryPermissions(final boolean askForThem) {
         return Main.checkPermissions(this,
                                       askForThem,
-                                      Manifest.permission.READ_PHONE_STATE,
                                       Manifest.permission.CAMERA,
                                       Manifest.permission.INTERNET);
     }
